@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../screens/restriction_list_screen.dart';
 import '../services/settings_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -190,6 +191,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
           FilledButton(
             onPressed: _save,
             child: const Text('保存'),
+          ),
+
+          const SizedBox(height: 32),
+
+          // ── App Detection ──
+          Text(
+            'アプリ検出',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+
+          SwitchListTile(
+            title: const Text('アプリ検出を有効にする'),
+            subtitle: const Text('スクリーンショットからアプリを自動判別'),
+            value: _settings.appDetectionEnabled,
+            onChanged: (value) {
+              setState(() => _settings.appDetectionEnabled = value);
+              _settings.save();
+            },
+          ),
+
+          SwitchListTile(
+            title: const Text('アクション自動ルーティング'),
+            subtitle: const Text('検出したアプリに応じた処理を自動実行'),
+            value: _settings.autoRouteAction,
+            onChanged: _settings.appDetectionEnabled
+                ? (value) {
+                    setState(() => _settings.autoRouteAction = value);
+                    _settings.save();
+                  }
+                : null,
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── Restriction Tracking ──
+          Text(
+            '制限トラッキング',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+
+          SwitchListTile(
+            title: const Text('制限トラッキングを有効にする'),
+            subtitle: const Text('AIサービスの利用制限を記録・通知'),
+            value: _settings.restrictionTrackingEnabled,
+            onChanged: (value) {
+              setState(() => _settings.restrictionTrackingEnabled = value);
+              _settings.save();
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.list_alt),
+            title: const Text('制限一覧'),
+            subtitle: const Text('記録された制限を確認'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const RestrictionListScreen(),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 32),

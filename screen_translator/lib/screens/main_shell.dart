@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'settings_screen.dart';
+import 'smart_capture_screen.dart';
 import 'translation_history_screen.dart';
 import 'translation_screen.dart';
 
@@ -15,6 +16,7 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
   static const _screens = <Widget>[
+    SmartCaptureScreen(),
     TranslationScreen(),
     TranslationHistoryScreen(),
   ];
@@ -46,6 +48,11 @@ class _MainShellState extends State<MainShell> {
           setState(() => _currentIndex = index);
         },
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.auto_awesome),
+            selectedIcon: Icon(Icons.auto_awesome),
+            label: 'スマート撮影',
+          ),
           NavigationDestination(
             icon: Icon(Icons.translate),
             selectedIcon: Icon(Icons.translate),

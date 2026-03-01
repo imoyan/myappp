@@ -38,6 +38,9 @@ class SettingsService {
   static const _keyTranslationEngine = 'translation_engine';
   static const _keyCloudApiUrl = 'cloud_api_url';
   static const _keyCloudApiKey = 'cloud_api_key';
+  static const _keyAppDetectionEnabled = 'app_detection_enabled';
+  static const _keyAutoRouteAction = 'auto_route_action';
+  static const _keyRestrictionTrackingEnabled = 'restriction_tracking_enabled';
 
   SharedPreferences? _prefs;
 
@@ -46,6 +49,9 @@ class SettingsService {
   String translationEngine = 'apple'; // 'apple' or 'cloud'
   String cloudApiUrl = '';
   String cloudApiKey = '';
+  bool appDetectionEnabled = true;
+  bool autoRouteAction = true;
+  bool restrictionTrackingEnabled = true;
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
@@ -54,6 +60,10 @@ class SettingsService {
     translationEngine = _prefs!.getString(_keyTranslationEngine) ?? 'apple';
     cloudApiUrl = _prefs!.getString(_keyCloudApiUrl) ?? '';
     cloudApiKey = _prefs!.getString(_keyCloudApiKey) ?? '';
+    appDetectionEnabled = _prefs!.getBool(_keyAppDetectionEnabled) ?? true;
+    autoRouteAction = _prefs!.getBool(_keyAutoRouteAction) ?? true;
+    restrictionTrackingEnabled =
+        _prefs!.getBool(_keyRestrictionTrackingEnabled) ?? true;
   }
 
   Future<void> save() async {
@@ -63,6 +73,10 @@ class SettingsService {
     await prefs.setString(_keyTranslationEngine, translationEngine);
     await prefs.setString(_keyCloudApiUrl, cloudApiUrl);
     await prefs.setString(_keyCloudApiKey, cloudApiKey);
+    await prefs.setBool(_keyAppDetectionEnabled, appDetectionEnabled);
+    await prefs.setBool(_keyAutoRouteAction, autoRouteAction);
+    await prefs.setBool(
+        _keyRestrictionTrackingEnabled, restrictionTrackingEnabled);
   }
 
   /// Name for a language code.
