@@ -105,3 +105,15 @@
 
 - User requested: この運用ルール追記をコミットしておくこと。
 - Implemented/decided: `AGENTS.md` にコミット前ジャーナル追記ルール（日時+TZ必須）を追加し、ジャーナルにも運用追記を反映した状態をコミット対象にした。
+
+## Entry: 2026-03-01T00:00:00+09:00 (JST)
+
+- User requested: iPhoneの背面タップでスクショを取得し翻訳する新規アプリ「screen_translator」を作成。学習用途として翻訳テキスト内の単語をタップして意味を確認できるようにし、履歴も保存できるようにすること。
+- Implemented/decided:
+  - 新規Flutterアプリ `screen_translator` を独立プロジェクトとして作成（backtap_analyzer とは別アプリ）
+  - 多言語対応の翻訳機能（Apple Translation API + OpenAI/Claude Cloud API の2エンジン対応）
+  - iOS Vision OCR によるテキスト抽出
+  - TappableText ウィジェットで翻訳結果の各単語をタップ可能にし、ボトムシートで品詞・意味・例文を表示
+  - 単語定義はLLM (Cloud API) で取得し、SQLite にキャッシュ
+  - 翻訳履歴を SQLite に保存、一覧・詳細画面で閲覧可能
+  - flutter analyze エラーゼロで完成
