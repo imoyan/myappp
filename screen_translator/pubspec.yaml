@@ -1,0 +1,27 @@
+name: screen_translator
+description: "Screenshot translator with vocabulary learning"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  image_picker: ^1.1.2
+  shared_preferences: ^2.5.3
+  http: ^1.2.2
+  sqflite: ^2.4.1
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  flutter_secure_storage: ^10.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

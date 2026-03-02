@@ -203,6 +203,30 @@
 - `display_template`
 - `author_name`（任意）
 
+### 12.2.1 表示モデル標準
+
+- Pack内の表示定義は固定 `WidgetType` を使う
+- 初期サポート:
+  - `list`
+  - `bar`
+  - `countdown`
+  - `checklist`
+  - `table`
+- 各Widgetは共通フィールドを持つ
+  - `title`
+  - `value`
+  - `unit`
+  - `status`
+  - `deadline`（任意）
+  - `progress`（0.0〜1.0、任意）
+- 方針: 「データは共通JSON、見た目はプリセット選択」でユーザーがレイアウト設計しなくても使える形にする
+
+### 12.2.2 フォーマット方針
+
+- 内部標準: アプリ専用の固定JSON schema
+- 共有互換: テキスト配布しやすいJSONをそのまま共有
+- 将来拡張: Adaptive Cards互換エクスポートを任意機能として追加可能にする
+
 ### 12.3 セキュリティ要件
 
 - Packはデータのみ（JSON）とし、任意コード実行は不可
