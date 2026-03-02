@@ -16,6 +16,7 @@ class TranslationHistoryScreen extends StatefulWidget {
 class _TranslationHistoryScreenState extends State<TranslationHistoryScreen> {
   final List<TranslationHistoryEntry> _entries = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
   bool _hasMore = true;
   static const _pageSize = 20;
 
@@ -33,6 +34,7 @@ class _TranslationHistoryScreenState extends State<TranslationHistoryScreen> {
       offset: 0,
     );
 
+    if (!mounted) return;
     setState(() {
       _entries.clear();
       _entries.addAll(entries);
@@ -42,16 +44,22 @@ class _TranslationHistoryScreenState extends State<TranslationHistoryScreen> {
   }
 
   Future<void> _loadMore() async {
-    if (!_hasMore) return;
+    if (!_hasMore || _isLoadingMore) return;
+    _isLoadingMore = true;
 
     final entries = await DatabaseService.instance.getTranslationHistory(
       limit: _pageSize,
       offset: _entries.length,
     );
 
+    if (!mounted) {
+      _isLoadingMore = false;
+      return;
+    }
     setState(() {
       _entries.addAll(entries);
       _hasMore = entries.length == _pageSize;
+      _isLoadingMore = false;
     });
   }
 
@@ -60,13 +68,12 @@ class _TranslationHistoryScreenState extends State<TranslationHistoryScreen> {
     if (entry.id == null) return;
 
     await DatabaseService.instance.deleteTranslation(entry.id!);
+    if (!mounted) return;
     setState(() => _entries.removeAt(index));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('履歴を削除しました')),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('履歴を削除しました')),
+    );
   }
 
   void _openDetail(TranslationHistoryEntry entry) {

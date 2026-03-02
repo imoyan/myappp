@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/translation_history_entry.dart';
 
 /// A list tile for a single translation history entry.
-class TranslationHistoryTile extends StatelessWidget {
+class TranslationHistoryTile extends StatefulWidget {
   const TranslationHistoryTile({
     super.key,
     required this.entry,
@@ -18,13 +18,34 @@ class TranslationHistoryTile extends StatelessWidget {
   final VoidCallback? onDismissed;
 
   @override
+  State<TranslationHistoryTile> createState() =>
+      _TranslationHistoryTileState();
+}
+
+class _TranslationHistoryTileState extends State<TranslationHistoryTile> {
+  bool _screenshotExists = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkScreenshot();
+  }
+
+  Future<void> _checkScreenshot() async {
+    if (widget.entry.screenshotPath == null) return;
+    final exists = await File(widget.entry.screenshotPath!).exists();
+    if (!mounted) return;
+    setState(() => _screenshotExists = exists);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     final tile = ListTile(
       leading: _buildLeading(theme),
       title: Text(
-        entry.previewText,
+        widget.entry.previewText,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodyMedium,
@@ -38,7 +59,7 @@ class TranslationHistoryTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              entry.languagePairLabel,
+              widget.entry.languagePairLabel,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onPrimaryContainer,
               ),
@@ -46,7 +67,7 @@ class TranslationHistoryTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            entry.relativeTime,
+            widget.entry.relativeTime,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
@@ -54,12 +75,12 @@ class TranslationHistoryTile extends StatelessWidget {
         ],
       ),
       trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
+      onTap: widget.onTap,
     );
 
-    if (onDismissed != null) {
+    if (widget.onDismissed != null) {
       return Dismissible(
-        key: ValueKey(entry.id),
+        key: ValueKey(widget.entry.id),
         direction: DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
@@ -67,7 +88,7 @@ class TranslationHistoryTile extends StatelessWidget {
           color: theme.colorScheme.error,
           child: Icon(Icons.delete, color: theme.colorScheme.onError),
         ),
-        onDismissed: (_) => onDismissed!(),
+        onDismissed: (_) => widget.onDismissed!(),
         child: tile,
       );
     }
@@ -76,12 +97,11 @@ class TranslationHistoryTile extends StatelessWidget {
   }
 
   Widget _buildLeading(ThemeData theme) {
-    if (entry.screenshotPath != null &&
-        File(entry.screenshotPath!).existsSync()) {
+    if (_screenshotExists) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Image.file(
-          File(entry.screenshotPath!),
+          File(widget.entry.screenshotPath!),
           width: 48,
           height: 48,
           fit: BoxFit.cover,

@@ -146,7 +146,10 @@ class CloudTranslationService implements TranslationService {
     final response = await http.post(url, headers: headers, body: body);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('APIエラー: ${response.statusCode} ${response.body}');
+      final preview = response.body.length > 200
+          ? '${response.body.substring(0, 200)}...'
+          : response.body;
+      throw Exception('APIエラー (${response.statusCode}): $preview');
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;

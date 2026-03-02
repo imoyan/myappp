@@ -70,16 +70,18 @@ import Vision
     }
 
     let request = VNRecognizeTextRequest { request, error in
-      if let error {
-        result(FlutterError(code: "VISION_ERROR", message: error.localizedDescription, details: nil))
-        return
+      DispatchQueue.main.async {
+        if let error {
+          result(FlutterError(code: "VISION_ERROR", message: error.localizedDescription, details: nil))
+          return
+        }
+        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+          result(FlutterError(code: "VISION_EMPTY", message: "no observations", details: nil))
+          return
+        }
+        let lines = observations.compactMap { $0.topCandidates(1).first?.string }
+        result(lines.joined(separator: "\n"))
       }
-      guard let observations = request.results as? [VNRecognizedTextObservation] else {
-        result(FlutterError(code: "VISION_EMPTY", message: "no observations", details: nil))
-        return
-      }
-      let lines = observations.compactMap { $0.topCandidates(1).first?.string }
-      result(lines.joined(separator: "\n"))
     }
 
     request.recognitionLevel = .accurate
@@ -92,7 +94,9 @@ import Vision
       do {
         try handler.perform([request])
       } catch {
-        result(FlutterError(code: "VISION_PERFORM_FAILED", message: error.localizedDescription, details: nil))
+        DispatchQueue.main.async {
+          result(FlutterError(code: "VISION_PERFORM_FAILED", message: error.localizedDescription, details: nil))
+        }
       }
     }
   }
@@ -147,9 +151,13 @@ import Vision
           "translatedText": response.targetText,
           "sourceLanguage": response.sourceLanguage.minimalIdentifier,
         ]
-        result(resultDict)
+        DispatchQueue.main.async {
+          result(resultDict)
+        }
       } catch {
-        result(FlutterError(code: "TRANSLATION_FAILED", message: error.localizedDescription, details: nil))
+        DispatchQueue.main.async {
+          result(FlutterError(code: "TRANSLATION_FAILED", message: error.localizedDescription, details: nil))
+        }
       }
     }
   }

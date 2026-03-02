@@ -53,10 +53,12 @@ class _TranslationScreenState extends State<TranslationScreen> {
       final picker = ImagePicker();
       final picked = await picker.pickImage(source: ImageSource.gallery);
       if (picked == null) {
+        if (!mounted) return;
         setState(() => _isProcessing = false);
         return;
       }
 
+      if (!mounted) return;
       setState(() {
         _selectedImagePath = picked.path;
         _statusMessage = 'テキストを抽出中 (OCR)...';
@@ -65,6 +67,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
       // 2. OCR
       final ocrText = await OcrService.instance.extractText(picked.path);
 
+      if (!mounted) return;
       setState(() => _statusMessage = '翻訳中...');
 
       // 3. Translate
@@ -75,6 +78,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
         targetLanguage: _targetLanguage,
       );
 
+      if (!mounted) return;
       setState(() {
         _result = result;
         _isProcessing = false;
@@ -94,6 +98,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isProcessing = false;

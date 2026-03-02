@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Supported languages with display names.
@@ -42,6 +43,8 @@ class SettingsService {
   static const _keyAutoRouteAction = 'auto_route_action';
   static const _keyRestrictionTrackingEnabled = 'restriction_tracking_enabled';
 
+  static const _secureStorage = FlutterSecureStorage();
+
   SharedPreferences? _prefs;
 
   String sourceLanguage = 'auto';
@@ -59,7 +62,7 @@ class SettingsService {
     targetLanguage = _prefs!.getString(_keyTargetLanguage) ?? 'ja';
     translationEngine = _prefs!.getString(_keyTranslationEngine) ?? 'apple';
     cloudApiUrl = _prefs!.getString(_keyCloudApiUrl) ?? '';
-    cloudApiKey = _prefs!.getString(_keyCloudApiKey) ?? '';
+    cloudApiKey = await _secureStorage.read(key: _keyCloudApiKey) ?? '';
     appDetectionEnabled = _prefs!.getBool(_keyAppDetectionEnabled) ?? true;
     autoRouteAction = _prefs!.getBool(_keyAutoRouteAction) ?? true;
     restrictionTrackingEnabled =
@@ -72,7 +75,7 @@ class SettingsService {
     await prefs.setString(_keyTargetLanguage, targetLanguage);
     await prefs.setString(_keyTranslationEngine, translationEngine);
     await prefs.setString(_keyCloudApiUrl, cloudApiUrl);
-    await prefs.setString(_keyCloudApiKey, cloudApiKey);
+    await _secureStorage.write(key: _keyCloudApiKey, value: cloudApiKey);
     await prefs.setBool(_keyAppDetectionEnabled, appDetectionEnabled);
     await prefs.setBool(_keyAutoRouteAction, autoRouteAction);
     await prefs.setBool(

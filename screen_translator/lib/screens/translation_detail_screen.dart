@@ -19,6 +19,20 @@ class TranslationDetailScreen extends StatefulWidget {
 
 class _TranslationDetailScreenState extends State<TranslationDetailScreen> {
   bool _showOriginal = false;
+  bool _screenshotExists = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkScreenshot();
+  }
+
+  Future<void> _checkScreenshot() async {
+    if (widget.entry.screenshotPath == null) return;
+    final exists = await File(widget.entry.screenshotPath!).exists();
+    if (!mounted) return;
+    setState(() => _screenshotExists = exists);
+  }
 
   void _onWordTap(String word, String sentenceContext) {
     showWordDefinitionSheet(
@@ -74,8 +88,7 @@ class _TranslationDetailScreenState extends State<TranslationDetailScreen> {
           const SizedBox(height: 16),
 
           // Screenshot
-          if (entry.screenshotPath != null &&
-              File(entry.screenshotPath!).existsSync()) ...[
+          if (_screenshotExists) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.file(

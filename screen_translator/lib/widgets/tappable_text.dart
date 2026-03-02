@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 ///
 /// Tapping a word calls [onWordTap] with the clean word and the surrounding
 /// sentence for context.
-class TappableText extends StatelessWidget {
+class TappableText extends StatefulWidget {
   const TappableText({
     super.key,
     required this.text,
@@ -18,12 +18,33 @@ class TappableText extends StatelessWidget {
   final TextStyle? style;
 
   @override
+  State<TappableText> createState() => _TappableTextState();
+}
+
+class _TappableTextState extends State<TappableText> {
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  @override
+  void dispose() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final baseStyle = style ??
+    // Dispose old recognizers before rebuilding.
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+
+    final baseStyle = widget.style ??
         Theme.of(context).textTheme.bodyLarge ??
         const TextStyle(fontSize: 16);
 
-    final sentences = _splitSentences(text);
+    final sentences = _splitSentences(widget.text);
     final spans = <InlineSpan>[];
 
     for (final sentence in sentences) {
@@ -35,6 +56,9 @@ class TappableText extends StatelessWidget {
           // Whitespace or pure punctuation — not tappable
           spans.add(TextSpan(text: token, style: baseStyle));
         } else {
+          final recognizer = TapGestureRecognizer()
+            ..onTap = () => widget.onWordTap(cleanWord, sentence.trim());
+          _recognizers.add(recognizer);
           spans.add(
             TextSpan(
               text: token,
@@ -44,8 +68,7 @@ class TappableText extends StatelessWidget {
                 decorationColor:
                     Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => onWordTap(cleanWord, sentence.trim()),
+              recognizer: recognizer,
             ),
           );
         }
@@ -74,18 +97,18 @@ class TappableText extends StatelessWidget {
   ///
   /// For Latin scripts: splits on whitespace boundaries.
   /// For CJK: each character becomes a separate token.
+  /// Uses runes to avoid splitting surrogate pairs (emoji, etc.).
   List<String> _tokenize(String sentence) {
     final tokens = <String>[];
     final buffer = StringBuffer();
     bool lastWasCjk = false;
 
-    for (int i = 0; i < sentence.length; i++) {
-      final char = sentence[i];
-      final isCjk = _isCjkChar(char);
+    for (final rune in sentence.runes) {
+      final char = String.fromCharCode(rune);
+      final isCjk = _isCjkCodePoint(rune);
       final isWhitespace = char.trim().isEmpty;
 
       if (isWhitespace) {
-        // Flush buffer
         if (buffer.isNotEmpty) {
           tokens.add(buffer.toString());
           buffer.clear();
@@ -93,12 +116,10 @@ class TappableText extends StatelessWidget {
         tokens.add(char);
         lastWasCjk = false;
       } else if (isCjk) {
-        // Flush any Latin buffer
         if (buffer.isNotEmpty && !lastWasCjk) {
           tokens.add(buffer.toString());
           buffer.clear();
         }
-        // Each CJK character is a separate tappable token
         if (buffer.isNotEmpty) {
           tokens.add(buffer.toString());
           buffer.clear();
@@ -106,7 +127,6 @@ class TappableText extends StatelessWidget {
         tokens.add(char);
         lastWasCjk = true;
       } else {
-        // Latin character — accumulate into a word
         if (lastWasCjk && buffer.isNotEmpty) {
           tokens.add(buffer.toString());
           buffer.clear();
@@ -125,15 +145,14 @@ class TappableText extends StatelessWidget {
 
   /// Returns the word with surrounding punctuation removed.
   String _cleanWord(String token) {
-    return token.replaceAll(RegExp(r'^[^\w\u3000-\u9FFF\uF900-\uFAFF]+'), '')
+    return token
+        .replaceAll(RegExp(r'^[^\w\u3000-\u9FFF\uF900-\uFAFF]+'), '')
         .replaceAll(RegExp(r'[^\w\u3000-\u9FFF\uF900-\uFAFF]+$'), '');
   }
 
-  /// Checks if a character is in the CJK Unified Ideographs range or common
+  /// Checks if a code point is in the CJK Unified Ideographs range or common
   /// Japanese/Korean ranges.
-  bool _isCjkChar(String char) {
-    if (char.isEmpty) return false;
-    final code = char.codeUnitAt(0);
+  bool _isCjkCodePoint(int code) {
     return (code >= 0x3000 && code <= 0x9FFF) ||
         (code >= 0xF900 && code <= 0xFAFF) ||
         (code >= 0xAC00 && code <= 0xD7AF) || // Korean Syllables
